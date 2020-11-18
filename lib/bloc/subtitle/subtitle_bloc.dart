@@ -51,13 +51,17 @@ class SubtitleBloc extends Bloc<SubtitleEvent, SubtitleState> {
     videoPlayerController.addListener(() {
       var videoPlayerPosition = videoPlayerController.value.position;
       if (videoPlayerPosition != null) {
-        for (var subtitleItem in subtitles.subtitles) {
-          if (videoPlayerPosition.inMilliseconds >
-                  subtitleItem.startTime.inMilliseconds &&
-              videoPlayerPosition.inMilliseconds <
-                  subtitleItem.endTime.inMilliseconds) {
-            add(UpdateLoadedSubtitle(subtitle: subtitleItem));
-          }
+        var subtitleItem = subtitles.subtitles.singleWhere(
+          (subtitle) =>
+              videoPlayerPosition.inMilliseconds > subtitle.startTime.inMilliseconds &&
+              videoPlayerPosition.inMilliseconds < subtitle.endTime.inMilliseconds,
+          orElse: () => null,
+        );
+
+        if (subtitleItem != null) {
+          add(UpdateLoadedSubtitle(subtitle: subtitleItem));
+        } else {
+          add(UpdateLoadedSubtitle(subtitle: Subtitle(text: '')));
         }
       }
     });
